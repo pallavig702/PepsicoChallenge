@@ -1,9 +1,5 @@
 
-# coding: utf-8
-
-# In[37]:
-
-
+# Import Libraries
 get_ipython().run_line_magic('matplotlib', 'inline')
 import matplotlib.pyplot as plt
 import os, sys
@@ -17,52 +13,28 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 
-
-# In[38]:
-
-
+#########################################################################################
+################################### DATA SET IMPORT #####################################
+#########################################################################################
 # Dataset location
 DATASET = 'shelf-life-study-data-for-analytics-challenge_prediction.xlsx'
 assert os.path.exists(DATASET)
 
-
-# Load and shuffle
+# Load Dataset and shuffle
 dataset = pd.read_excel(DATASET).sample(frac = 1).reset_index(drop=True)
-#dataset.describe()
 
-olddataset=dataset
-
-
-# In[39]:
-
-
-#dataset.head()
-
-
-# In[40]:
-
-
-#print(dataset.columns)
-
-
-# In[41]:
-
-
-#dataset.columns = [x.strip(" ") for x in dataset.columns] 
+#olddataset=dataset
+#########################################################################################
+#################### Replace Space in Columns names with no space #######################
+#########################################################################################
 dataset.columns=dataset.columns.str.replace(r'\s+', '')
 dataset.head()
 
-
-# In[42]:
-
-
-
+#########################################################################################
+############################# BINARISE TARGET ###########################################
+#########################################################################################
 NotFresh=dataset[dataset.DifferenceFromFresh >=20]
 print("Ratio of not fresh :",NotFresh.shape[0]/dataset.shape[0])
-
-
-# In[43]:
-
 
 dataset['BinaryDifferenceFromFresh'] = np.where(dataset['DifferenceFromFresh']>=20, '1', '0')
 #dataset.shape[]
@@ -70,52 +42,37 @@ for i in range(dataset.shape[0]):
     #print(i)
     print(dataset.DifferenceFromFresh[i], dataset.BinaryDifferenceFromFresh[i])
 
-
-# In[44]:
-
-
 dataset=dataset.drop(columns="DifferenceFromFresh")
-#df.columns = df.columns.str.replace(' ', '_')
+
+#########################################################################################
+############################# SOME MORE DATA CARPENTRY ##################################
+#########################################################################################
 dataset['StorageConditions'].replace(['Warm Climate'], 'WarmClimate',inplace=True)
 dataset['StorageConditions'].replace(['High Temperature and Humidity'], 'HighTemperatureandHumidity',inplace=True)
 dataset['StorageConditions'].replace(['Cold Climate'], 'ColdClimate',inplace=True)
 dataset.head()
 
 
-# In[45]:
-
-
+#########################################################################################
+########################## PRINT UNIQUE VALUES IN EACH COLUMN ###########################
+#########################################################################################
 cols= dataset.columns
 for i in cols:
     print(dataset[i].unique())
 
-
-    #print(dataset.DifferenceFromFresh[i], dataset.BinaryDifferenceFromFresh[i])
-
-
-# In[46]:
-
-
+#########################################################################################
+########################## PRINT NULL VALUES IN EACH COLUMN ###########################
+#########################################################################################
 dfObj = pd.DataFrame(dataset, columns = cols)
 print("Nan in each columns" , dfObj.isnull().sum(), sep='\n')
 
-
-# In[47]:
-
-
+#########################################################################################
+########################## DROP COLUMNS WITH HUGE NULL VALUES ###########################
+#########################################################################################
 df=dataset.drop(["StudyNumber","SampleID","Prediction","TransparentWindowinPackage","PackagingStabilizerAdded","PreservativeAdded","Hexanal(ppm)","ResidualOxygen(%)","Moisture(%)"], axis=1)
 Test_df=dataset.drop(["StudyNumber","Prediction","TransparentWindowinPackage","PackagingStabilizerAdded","PreservativeAdded","Hexanal(ppm)","ResidualOxygen(%)","Moisture(%)"], axis=1)
 df.shape
 
-
-# In[48]:
-
-
-Test_df.head()
-df.head()
-
-
-# In[49]:
 
 
 yes_no_columns_df = list(filter(lambda i: df[i].dtype!=np.float64, df.columns))
